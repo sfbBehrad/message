@@ -16,26 +16,22 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: gradle
 
-    - name: Find and Build with Gradle
+    - name: Build with global Gradle
       run: |
-        # جستجوی خودکار برای یافتن فایل gradlew در تمام پوشه‌ها
-        GRADLE_PATH=$(find . -name "gradlew" | head -n 1)
-        if [ -z "$GRADLE_PATH" ]; then
-          echo "Error: gradlew not found! Please make sure you uploaded all files correctly."
+        # جستجو برای پیدا کردن پوشه اصلی تنظیمات پروژه
+        PROJECT_DIR=$(find . -name "settings.gradle*" | head -n 1)
+        if [ -z "$PROJECT_DIR" ]; then
+          echo "Error: settings.gradle not found! The project structure might be incomplete."
           exit 1
         fi
-        GRADLE_DIR=$(dirname "$GRADLE_PATH")
-        echo "Found gradlew in $GRADLE_DIR"
         
-        # ورود به پوشه، دادن دسترسی و ساخت APK
-        cd "$GRADLE_DIR"
-        chmod +x gradlew
-        ./gradlew assembleDebug
+        # ورود به پوشه و بیلد با گریدلِ خود سرور
+        cd $(dirname "$PROJECT_DIR")
+        gradle assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: secure-chat-apk
-        path: "**/app/build/outputs/apk/debug/app-debug.apk"
+        path: "**/build/outputs/apk/debug/*.apk"
