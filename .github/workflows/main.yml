@@ -19,15 +19,19 @@ jobs:
 
     - name: Build with global Gradle
       run: |
-        # جستجو برای پیدا کردن پوشه اصلی تنظیمات پروژه
+        # پیدا کردن مسیر اصلی پروژه
         PROJECT_DIR=$(find . -name "settings.gradle*" | head -n 1)
         if [ -z "$PROJECT_DIR" ]; then
-          echo "Error: settings.gradle not found! The project structure might be incomplete."
+          echo "Error: settings.gradle not found!"
           exit 1
         fi
         
-        # ورود به پوشه و بیلد با گریدلِ خود سرور
         cd $(dirname "$PROJECT_DIR")
+        
+        # ساخت فایل امضای دیجیتال (keystore) به صورت خودکار برای رفع ارور
+        keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "C=US, O=Android, CN=Android Debug"
+        
+        # بیلد کردن پروژه
         gradle assembleDebug
 
     - name: Upload APK
